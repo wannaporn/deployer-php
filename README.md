@@ -8,7 +8,7 @@ $ composer require intbizth/deployer-php:dev-master
 `MUST` without `--dev`
 
 ## Usage
-See [server.dist.yml](server.dist.yml)
+See [servers.dist.yml](servers.dist.yml)
 
  - `common:system:install` install web server and friends.
  - `common:install` first install project.
