@@ -8,7 +8,7 @@ task('common:install:init', function () {
     $phpVersion = get('php_version');
 
     // create target
-    run("mkdir -p {{deploy_path}}");
+    run('if [ ! -d {{deploy_path}} ]; then mkdir -p {{deploy_path}}; fi');
 
     // upload config
     upload('{{app_path}}/*', "{{deploy_path}}/.deploy");
