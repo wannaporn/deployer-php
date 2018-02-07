@@ -90,7 +90,7 @@ function _define_tasks(Host $host)
     foreach ((array)$host->get('defines') as $task => $commands) {
         $runs = [];
         foreach ((array)$commands as $command) {
-            if (preg_match('/^(run|sf_run)\((.*)\)$/', $command, $match)) {
+            if (preg_match('/^(run|sf_run|supervisor_ctl)\((.*)\)$/', $command, $match)) {
                 $fn = $match[1];
                 $arg = trim($match[2], preg_match('/^"/', $match[2]) ? '"' : "'");
             } else {
@@ -129,6 +129,12 @@ function sf_run($commands)
     foreach ((array)$commands as $command) {
         run("$console $command {{console_options}}");
     }
+}
+
+function supervisor_ctl($command)
+{
+    // unix server use default authen
+    run("supervisorctl -usupervisor -psupervisor_password $command");
 }
 
 task('common:setup', function () {
