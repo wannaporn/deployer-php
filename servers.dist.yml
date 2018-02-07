@@ -10,10 +10,10 @@ server_00:
     repository: ~
     redis_password: ~
     supervisor_password: ~
-    # cloudflare
-    email: ~
-    api_key: ~
-    domain: ~
+    cloudflare:
+        email: ~
+        api_key: ~
+        domain: ~
     environments:
         <<: *environments
         php_version: 7.2
