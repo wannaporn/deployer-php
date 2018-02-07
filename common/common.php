@@ -188,7 +188,7 @@ task('common:build_parameters', function () {
     );
 
     // Querystring for app.js & style.css
-    $parameters['parameters']['prod_asset_version'] = time();
+    $parameters['parameters']['asset_release'] = time();
 
     _apply_config($parameters);
 
