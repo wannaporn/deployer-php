@@ -39,6 +39,7 @@ server_00:
         after:
             common:install:
                 - self:fresh_install
+                - deploy:writable
             cleanup:
                 - deploy:cloudflare
     parameters:
