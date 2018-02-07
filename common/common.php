@@ -25,6 +25,7 @@ set('http_strict_server_name', true);
 
 // Symfony console bin
 set('sf', function () {
+    // can't use `release_path` case of using on none-release task.
     return sprintf('{{bin/php}} {{deploy_path}}/current/%s/console', trim(get('bin_dir'), '/'));
 });
 
@@ -59,18 +60,26 @@ function _setup_tasks(Host $host)
     $after = $tasks['after'] ?? [];
     $task = $tasks['task'] ?? [];
 
+    $selfName = $host->getHostname();
+
     foreach ($task as $name => $tasks) {
-        task($host->getHostname() . ':' . $name, $tasks);
+        task($selfName . ':' . $name, $tasks);
     }
 
     foreach ($before as $name => $tasks) {
         foreach ((array)$tasks as $task) {
+            $name = preg_replace('/^self:', $selfName . ':', $name);
+            $task = preg_replace('/^self:', $selfName . ':', $task);
+
             before($name, $task);
         }
     }
 
     foreach ($after as $name => $tasks) {
         foreach ((array)$tasks as $task) {
+            $name = preg_replace('/^self:/', $selfName . ':', $name);
+            $task = preg_replace('/^self:/', $selfName . ':', $task);
+
             after($name, $task);
         }
     }
@@ -108,8 +117,11 @@ function _apply_config(&$config)
 
 function sf_run($commands)
 {
+    // need to use `release_path` to use released console. (not use current_path case of not finish release yet.)
+    $console = sprintf('{{bin/php}} {{release_path}}/%s/console', trim(get('bin_dir'), '/'));
+
     foreach ((array)$commands as $command) {
-        run("{{sf}} $command {{console_options}}");
+        run("$console $command {{console_options}}");
     }
 }
 
@@ -198,5 +210,9 @@ task('common:copy_local', function () {
         upload($file, "{{release_path}}/$file");
     }
 
-    sf_run('sylius:theme:assets:install {{release_path}}/web --symlink');
+    sf_run('assets:install {{release_path}}/web --relative');
+
+    if (get('sylius_theme_used')) {
+        sf_run('sylius:theme:assets:install {{release_path}}/web --relative');
+    }
 });
