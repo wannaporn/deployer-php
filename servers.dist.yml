@@ -1,0 +1,56 @@
+server_00:
+    <<: *common
+    hostname: ~
+    user: root
+    #password: ~
+    port: 25252
+    app_path: ./vendor/intbizth/deployer/apps/tpl
+    deploy_path: /var/www/web
+    server_name: ~
+    repository: ~
+    redis_password: ~
+    supervisor_password: ~
+    cloudflare_email: ~
+    cloudflare_api_key: ~
+    cloudflare_domain: ~
+    environments:
+        <<: *environments
+        php_version: 7.2
+        php_fastcgi: /run/php/php7.2-fpm.sock
+        http_strict_server_name: true
+    substitutions:
+        <<: *substitutions
+        EDIT_ME_REDIS_PASSWORD: '{{redis_password}}'
+        EDIT_ME_SUPERVISOR_PASSWORD: '{{supervisor_password}}'
+    defines:
+        fresh_install:
+            - sf_run(doctrine:database:drop --force --if-exists)
+            - sf_run(doctrine:database:create)
+            - sf_run(doctrine:database:drop --force --if-exists --connection=media)
+            - sf_run(doctrine:database:create --connection=media)
+            - sf_run(doctrine:phpcr:init:dbal --force)
+            - sf_run(doctrine:phpcr:repository:init)
+            - sf_run(sylius:fixtures:load default -n)
+            - sf_run(doctrine:fixtures:load --append -n)
+            - sf_run(cache:warmup)
+    tasks:
+        after:
+            cleanup:
+                - deploy:cloudflare
+    parameters:
+        database_host: 127.0.0.1
+        database_port: 7890
+        database_name: db_name
+        database_user: root
+        database_password: ~
+        mailer_transport: smtp
+        mailer_host: 127.0.0.1
+        mailer_user: ~
+        mailer_password: ~
+        mailer_encryption: null
+        mailer_port: 2525
+        redis_monolog_dns: 'redis://dummy:{{redis_password}}@localhost:1234/0'
+        redis_session_dns: 'redis://dummy:{{redis_password}}@localhost:1234/1'
+        redis_swiftmailer_dns: 'redis://dummy:{{redis_password}}@localhost:1234/2'
+        redis_ws_cache_dns: 'redis://dummy:{{redis_password}}@localhost:1234/3'
+        locale: th
