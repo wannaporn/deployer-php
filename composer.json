@@ -3,6 +3,7 @@
     "description": "Deployer script.",
     "type": "library",
     "require": {
+        "php": "~7.0",
         "deployer/deployer": "^6.0",
         "deployer/recipes": "^6.0",
         "phpspec/phpspec": "^4.3"
@@ -14,5 +15,10 @@
             "email": "nukboon@gmail.com"
         }
     ],
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "autoload": {
+        "classmap": [
+            "TrustedProxies.php"
+        ]
+    }
 }
