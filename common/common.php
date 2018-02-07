@@ -97,6 +97,12 @@ function _define_tasks(Host $host)
                 throw new RuntimeException("Not supported command `$command`.");
             }
 
+            if ('run' === $fn) {
+                $fn = function ($arg) {
+                    run($arg);
+                };
+            }
+
             $runs[] = [$fn, $arg];
         }
 
