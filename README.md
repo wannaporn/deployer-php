@@ -1,6 +1,12 @@
 # Deployer
 Just a deploy template.
 
+## Install
+```shell
+$ composer require intbizth/deployer-php:dev-master
+```
+`MUST` without `--dev`
+
 ## Usage
 See [server.dist.yml](server.dist.yml)
 
