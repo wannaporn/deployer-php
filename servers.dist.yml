@@ -16,27 +16,28 @@ server_00:
         domain: ~
     environments:
         <<: *environments
-        php_version: 7.2
-        php_fastcgi: /run/php/php7.2-fpm.sock
         http_strict_server_name: true
     substitutions:
         <<: *substitutions
         EDIT_ME_REDIS_PASSWORD: '{{redis_password}}'
         EDIT_ME_SUPERVISOR_PASSWORD: '{{supervisor_password}}'
+    copy_local_dirs:
+        - templates/emails/build
     defines:
         fresh_install:
             - sf_run(doctrine:database:drop --force --if-exists)
             - sf_run(doctrine:database:create)
             - sf_run(doctrine:database:drop --force --if-exists --connection=media)
             - sf_run(doctrine:database:create --connection=media)
+            - sf_run(doctrine:schema:update --dump-sql --force)
             - sf_run(doctrine:phpcr:init:dbal --force)
             - sf_run(doctrine:phpcr:repository:init)
-            - sf_run(sylius:fixtures:load default -n)
-            - sf_run(doctrine:fixtures:load --append -n)
+            - sf_run(sylius:fixtures:load default)
+            - sf_run(doctrine:fixtures:load --append)
             - sf_run(cache:warmup)
     tasks:
         after:
-            common:deploy:
+            common:install:
                 - self:fresh_install
             cleanup:
                 - deploy:cloudflare
@@ -52,8 +53,13 @@ server_00:
         mailer_password: ~
         mailer_encryption: null
         mailer_port: 2525
-        redis_monolog_dns: 'redis://dummy:{{redis_password}}@localhost:1234/0'
-        redis_session_dns: 'redis://dummy:{{redis_password}}@localhost:1234/1'
-        redis_swiftmailer_dns: 'redis://dummy:{{redis_password}}@localhost:1234/2'
-        redis_ws_cache_dns: 'redis://dummy:{{redis_password}}@localhost:1234/3'
+        supervisor_password: '{{supervisor_password}}'
+        redis_password: '{{redis_password}}'
+        redis_monolog_dns: 'redis://root:{{redis_password}}@localhost:1234/0'
+        redis_session_dns: 'redis://root:{{redis_password}}@localhost:1234/1'
+        redis_swiftmailer_dns: 'redis://root:{{redis_password}}@localhost:1234/2'
+        redis_ws_cache_dns: 'redis://root:{{redis_password}}@localhost:1234/3'
+        redis_enqueue_dns: 'redis://root:{{redis_password}}@localhost:1234?database=4'
         locale: th
+        trusted_hosts:
+            - '{{server_name}}'
