@@ -7,6 +7,10 @@ use function Deployer\{
 task('common:install:init', function () {
     $phpVersion = get('php_version');
 
+    // create target
+    run("mkdir -p {{deploy_path}}");
+
+    // upload config
     upload('{{app_path}}/*', "{{deploy_path}}/.deploy");
 
     // may -i '' -e ... @see https://stackoverflow.com/questions/19456518
