@@ -202,7 +202,7 @@ task('common:build_parameters', function () {
  * Copy locale file & reinstall assets!
  */
 task('common:copy_local', function () {
-    foreach (get('copy_local_dirs') as $dir) {
+    foreach ((array)get('copy_local_dirs') as $dir) {
         upload("$dir/*", "{{release_path}}/$dir");
     }
 
