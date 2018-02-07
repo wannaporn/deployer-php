@@ -4,6 +4,13 @@ Just a deploy template.
 ## Usage
 See [server.dist.yml](server.dist.yml)
 
+ - `common:system:install` install web server and friends.
+ - `common:install` first install project.
+ - `common:deploy` update project.
+ - `common:deploy_quick` quick update project -- without upload assets.
+
+ PS. No `npm` or `yarn` action on target machine, `MUST` to install all assets locally before deploy.
+
 ## TODOs
   - [ ] Separate service template in require to use.
 
