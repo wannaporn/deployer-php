@@ -1,6 +1,6 @@
 {
-    "name": "intbizth/deployer",
-    "description": "Deployer script.",
+    "name": "intbizth/deployer-php",
+    "description": "Deployer script for SF Project.",
     "type": "library",
     "require": {
         "php": "~7.0",
