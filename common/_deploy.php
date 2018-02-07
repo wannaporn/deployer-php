@@ -6,6 +6,7 @@ use function Deployer\{
 
 task('common:install', [
     'common:setup',
+    'common:system:clear',
     'deploy:info',
     'deploy:prepare',
     'deploy:release',
