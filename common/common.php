@@ -141,6 +141,8 @@ task('common:setup', function () {
     $hostname = Context::get()->getHost()->getHostname();
     writeln("> Setting up deploy environments on <fg=cyan>$hostname</fg=cyan> port <fg=cyan>{{port}}</fg=cyan>");
 
+    set('deploy_path', get('deploy_root') . DIRECTORY_SEPARATOR . get('backend_name'));
+
     $environments = (array)get('environments', []);
 
     foreach (array_keys($environments) as $key) {

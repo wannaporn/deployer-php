@@ -4,7 +4,7 @@ server_00:
     user: root
     #password: ~
     port: 25252
-    deploy_path: /var/www
+    deploy_root: /var/www
     vhost_map_path: ./deploy/vhost_map.conf
     backend_name: ~
     repository: ~
