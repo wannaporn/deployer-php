@@ -5,7 +5,7 @@ Just a deploy template.
 ```shell
 $ composer require intbizth/deployer-php:dev-master
 ```
-`MUST` without `--dev`
+`MUST` without `--dev` if use `TrustedProxies`.
 
 ## Usage
 See [servers.dist.yml](servers.dist.yml)
