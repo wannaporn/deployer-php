@@ -4,6 +4,28 @@ use function Deployer\{
     task, upload, get, run, parse
 };
 
+function _substitutions(array $paths)
+{
+    // may -i '' -e ... @see https://stackoverflow.com/questions/19456518
+    $substitutions = '';
+
+    foreach ($paths as $key => $value) {
+        $substitutions .= sprintf("-e 's/%s/%s/g' ", $key, preg_quote(parse($value), '/'));
+    }
+
+    /*if (get('http_strict_server_name')) {
+        // can't not use multiple condition on nginx -- if .. and ...
+        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host != \$server_name/g' ";
+    } else {
+        // no way true condition
+        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host = 0/g' ";
+    }*/
+
+    if (!empty($substitutions)) {
+        run("find {{deploy_path}}/.deploy/ -type f -exec sed -i $substitutions {} \;");
+    }
+}
+
 task('common:install:init', function () {
     $phpVersion = get('php_version');
 
@@ -13,38 +35,34 @@ task('common:install:init', function () {
     // upload config
     upload('{{app_path}}/*', "{{deploy_path}}/.deploy");
 
-    // may -i '' -e ... @see https://stackoverflow.com/questions/19456518
-    $substitutions = '';
+    __substitutions((array)get('substitutions', []));
 
-    foreach ((array)get('substitutions', []) as $key => $value) {
-        $substitutions .= sprintf("-e 's/%s/%s/g' ", $key, preg_quote(parse($value), '/'));
-    }
-
-    if (get('http_strict_server_name')) {
-        // can't not use multiple condition on nginx -- if .. and ...
-        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host != \$server_name/g' ";
-    } else {
-        // no way true condition
-        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host = 0/g' ";
-    }
-
-    if (!empty($substitutions)) {
-        run("find {{deploy_path}}/.deploy/ -type f -exec sed -i $substitutions {} \;");
-    }
-
+    // main file
     run("ln -nfs {{deploy_path}}/.deploy/nginx/nginx.conf /etc/nginx/nginx.conf");
-    run("ln -nfs {{deploy_path}}/.deploy/nginx/server.d /etc/nginx/server.d");
+
+    // include dirs
     run("ln -nfs {{deploy_path}}/.deploy/nginx/bots.d /etc/nginx/bots.d");
+    run("ln -nfs {{deploy_path}}/.deploy/nginx/http.d /etc/nginx/http.d");
+    run("ln -nfs {{deploy_path}}/.deploy/nginx/server.d /etc/nginx/server.d");
+    run("ln -nfs {{deploy_path}}/.deploy/nginx/vhost.d /etc/nginx/vhost.d");
+
+    // link files
     run("ln -nfs {{deploy_path}}/.deploy/nginx/conf.d/blacklist.conf /etc/nginx/conf.d/blacklist.conf");
     run("chmod 0755 {{deploy_path}}/.deploy/nginx/conf.d/blacklist.conf");
-    run("ln -nfs {{deploy_path}}/.deploy/nginx/backend.conf /etc/nginx/sites-enabled/backend");
-    run("rm -rf /etc/nginx/sites-enabled/default");
 
     run("ln -nfs {{deploy_path}}/.deploy/cli/php.ini /etc/php/$phpVersion/cli/conf.d/10-custom.ini");
+
+    // TODO: multi support
     run("ln -nfs {{deploy_path}}/.deploy/fpm/php.ini /etc/php/$phpVersion/fpm/conf.d/10-custom.ini");
     run("ln -nfs {{deploy_path}}/.deploy/fpm/pool/www.conf /etc/php/$phpVersion/fpm/pool.d/www.conf");
 
     run("ln -nfs {{deploy_path}}/.deploy/supervisor/supervisord.conf /etc/supervisor/supervisord.conf");
+
+    // upload user defined supervisors
+    // be careful filename when using in multi-backend mode.
+    foreach ((array)get('supervisors') as $file) {
+        upload($file, "{{deploy_path}}/.deploy/supervisor/conf.d/");
+    }
 
     // cannot use symlink for mysql due to permission on my.cnf denide by mysql user
     run("cp -f {{deploy_path}}/.deploy/mysql/my.cnf /etc/mysql/my.cnf");
