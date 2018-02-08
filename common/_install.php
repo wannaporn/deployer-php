@@ -79,6 +79,9 @@ task('common:install:init_vhost', function () {
     foreach ((array)get('supervisors') as $file) {
         upload($file, "{{deploy_root}}/.deploy/supervisor/conf.d/");
     }
+
+    // global path -- when run vhost_update alone
+    _substitutions((array)get('substitutions', []));
 })->setPrivate();
 
 task('common:install:testing', function () {
