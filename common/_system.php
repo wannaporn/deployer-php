@@ -17,6 +17,11 @@ task('reload:supervisor', function () {
     run('systemctl restart supervisor');
 });
 
+task('update:supervisor', function () {
+    supervisor_ctl('reread');
+    supervisor_ctl('update');
+});
+
 task('reload:mysql', function () {
     run('systemctl restart mysql');
 });

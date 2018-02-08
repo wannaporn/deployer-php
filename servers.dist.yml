@@ -4,9 +4,9 @@ server_00:
     user: root
     #password: ~
     port: 25252
-    app_path: ./vendor/intbizth/deployer/apps/tpl
-    deploy_path: /var/www/web
-    server_name: ~
+    deploy_path: /var/www
+    vhost_map_path: ./deploy/vhost_map.conf
+    backend_name: ~
     repository: ~
     redis_password: ~
     supervisor_password: ~
@@ -16,7 +16,7 @@ server_00:
         domain: ~
     environments:
         <<: *environments
-        http_strict_server_name: true
+        cloudflare_proxy_used: true
     substitutions:
         <<: *substitutions
         EDIT_ME_REDIS_PASSWORD: '{{redis_password}}'
@@ -62,5 +62,4 @@ server_00:
         redis_ws_cache_dns: 'redis://root:{{redis_password}}@localhost:1234/3'
         redis_enqueue_dns: 'redis://root:{{redis_password}}@localhost:1234?database=4'
         locale: th
-        trusted_hosts:
-            - '{{server_name}}'
+        trusted_hosts: [ '{{backend_name}}' ]

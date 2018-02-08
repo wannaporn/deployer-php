@@ -1,11 +1,11 @@
 server {
-    listen $backend_port;
-    listen [::]:$backend_port;
-    server_name ${backend_name}_backend;
-    root $deploy_current_root;
+    listen EDIT_ME_BACKEND_PORT;
+    listen [::]:EDIT_ME_BACKEND_PORT;
+    server_name EDIT_ME_BACKEND_NAME;
+    root EDIT_ME_DEPLOY_PATH/EDIT_ME_BACKEND_NAME/current/web;
 
-    error_log  /var/log/nginx/${backend_name}_backend_error.log;
-    access_log /var/log/nginx/${backend_name}_backend_access.log main;
+    error_log /var/log/nginx/EDIT_ME_BACKEND_NAME_error.log;
+    access_log /var/log/nginx/EDIT_ME_BACKEND_NAME_access.log main;
 
     location / {
         try_files $uri /app.php$is_args$args;

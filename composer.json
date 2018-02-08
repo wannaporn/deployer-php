@@ -15,10 +15,5 @@
             "email": "nukboon@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
-    "autoload": {
-        "classmap": [
-            "TrustedProxies.php"
-        ]
-    }
+    "minimum-stability": "stable"
 }

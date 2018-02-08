@@ -3,9 +3,8 @@ Just a deploy template.
 
 ## Install
 ```shell
-$ composer require intbizth/deployer-php:dev-master
+$ composer require intbizth/deployer-php:dev-master --dev
 ```
-`MUST` without `--dev` if use `TrustedProxies`.
 
 ## Usage
 See [servers.dist.yml](servers.dist.yml)

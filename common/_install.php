@@ -13,14 +13,6 @@ function _substitutions(array $paths)
         $substitutions .= sprintf("-e 's/%s/%s/g' ", $key, preg_quote(parse($value), '/'));
     }
 
-    /*if (get('http_strict_server_name')) {
-        // can't not use multiple condition on nginx -- if .. and ...
-        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host != \$server_name/g' ";
-    } else {
-        // no way true condition
-        $substitutions .= "-e 's/EDIT_ME_HTTP_STRICT_SERVER_NAME_COND/\$host = 0/g' ";
-    }*/
-
     if (!empty($substitutions)) {
         run("find {{deploy_path}}/.deploy/ -type f -exec sed -i $substitutions {} \;");
     }
@@ -35,7 +27,7 @@ task('common:install:init', function () {
     // upload config
     upload('{{app_path}}/*', "{{deploy_path}}/.deploy");
 
-    __substitutions((array)get('substitutions', []));
+    _substitutions((array)get('substitutions', []));
 
     // main file
     run("ln -nfs {{deploy_path}}/.deploy/nginx/nginx.conf /etc/nginx/nginx.conf");
@@ -58,37 +50,80 @@ task('common:install:init', function () {
 
     run("ln -nfs {{deploy_path}}/.deploy/supervisor/supervisord.conf /etc/supervisor/supervisord.conf");
 
-    // upload user defined supervisors
-    // be careful filename when using in multi-backend mode.
-    foreach ((array)get('supervisors') as $file) {
-        upload($file, "{{deploy_path}}/.deploy/supervisor/conf.d/");
-    }
-
     // cannot use symlink for mysql due to permission on my.cnf denide by mysql user
     run("cp -f {{deploy_path}}/.deploy/mysql/my.cnf /etc/mysql/my.cnf");
 
     run("cp -f {{deploy_path}}/.deploy/ssl/* /etc/ssl");
 })->setPrivate();
 
+task('common:install:init_vhost', function () {
+    $backendName = get('backend_name');
+    $backendPort = get('backend_port');
+    $deployPath = get('deploy_path');
+    $vhostMapPath = get('vhost_map_path');
+    $targetFile = "$deployPath/.deploy/nginx/vhost.d/$backendName.conf";
+
+    run("cp -R {{deploy_path}}/.deploy/nginx/default_backend.conf.dist $targetFile");
+
+    // upload user vhost map
+    upload($vhostMapPath, "{{deploy_path}}/.deploy/nginx/http.d/vhost_map_user.conf");
+
+    _substitutions([
+        'EDIT_ME_BACKEND_PORT' => $backendPort,
+        'EDIT_ME_BACKEND_NAME' => $backendName,
+        'EDIT_ME_REMOTE_ADDR' => get('cloudflare_proxy_used') ? '$http_cf_connecting_ip' : '$remote_addr',
+    ]);
+
+    // upload user defined supervisors
+    // be careful filename when using in multi-backend mode.
+    foreach ((array)get('supervisors') as $file) {
+        upload($file, "{{deploy_path}}/.deploy/supervisor/conf.d/");
+    }
+})->setPrivate();
+
 task('common:install:testing', function () {
-    run("rm -rf {{deploy_path}}/current && mkdir -p {{deploy_path}}/current/web");
-    run("ln -nfs {{deploy_path}}/.deploy/app.php {{deploy_path}}/current/web/app.php");
+    run("rm -rf {{deploy_path}}/{{backend_name}}/current && mkdir -p {{deploy_path}}/{{backend_name}}/current/web");
+    run("ln -nfs {{deploy_path}}/.deploy/app.php {{deploy_path}}/{{backend_name}}/current/web/app.php");
+})->setPrivate();
+
+task('common:install:clean', function () {
+    run("rm -rf {{deploy_path}}/*");
+    run("rm -rf {{deploy_path}}/.deploy");
 })->setPrivate();
 
 task('common:install:clear', function () {
-    run("rm -rf {{deploy_path}}/*");
+    run("rm -rf {{deploy_path}}/{{backend_name}}/*");
 })->setPrivate();
 
 task('common:system:install', [
     'common:setup',
-    'common:install:clear',
+    'common:install:clean',
     'common:install:init',
+    'common:install:init_vhost',
     'common:install:testing',
     'reload:fpm',
     'reload:nginx',
     'reload:mysql',
     'reload:supervisor',
 ])->desc('Initial system');
+
+task('common:system:vhost', [
+    'common:setup',
+    'common:install:clear',
+    'common:install:init_vhost',
+    'common:install:testing',
+    'reload:fpm',
+    'reload:nginx',
+    'reload:supervisor',
+])->desc('Initial Vhost');
+
+task('common:system:vhost_update', [
+    'common:setup',
+    'common:install:init_vhost',
+    'reload:fpm',
+    'reload:nginx',
+    'update:supervisor',
+])->desc('Update Vhost');
 
 task('common:system:reset_config', [
     'common:setup',
