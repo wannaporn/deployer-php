@@ -211,9 +211,9 @@ task('common:copy_local', function () {
         upload($file, "{{release_path}}/$file");
     }
 
-    sf_run('assets:install {{release_path}}/web --relative');
+    /**sf_run('assets:install {{release_path}}/web --relative');
 
     if (get('sylius_theme_used')) {
         sf_run('sylius:theme:assets:install {{release_path}}/web --relative');
-    }
+    }**/
 });
