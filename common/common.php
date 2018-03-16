@@ -191,10 +191,6 @@ task('common:build_parameters', function () {
     // Querystring for app.js & style.css
     $parameters['parameters']['asset_release'] = time();
 
-    if (in_array($parameters['parameters']['secret'], [null, 'EDITME'])) {
-        $parameters['parameters']['secret'] = md5(uniqid());
-    }
-
     _apply_config($parameters);
 
     $newParameters = \Symfony\Component\Yaml\Yaml::dump($parameters);
