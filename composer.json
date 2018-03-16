@@ -6,7 +6,7 @@
         "php": "~7.0",
         "deployer/deployer": "^6.0",
         "deployer/recipes": "^6.0",
-        "phpspec/phpspec": "^4.3"
+        "phpspec/phpspec": "^3.2"
     },
     "license": "MIT",
     "authors": [
