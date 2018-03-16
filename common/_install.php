@@ -63,6 +63,9 @@ task('common:install:init_vhost', function () {
     $vhostMapPath = get('vhost_map_path');
     $targetFile = "$deployRoot/.deploy/nginx/vhost.d/$backendName.conf";
 
+    // upload config
+    upload('{{app_path}}/*', "{{deploy_root}}/.deploy");
+
     run("cp -R {{deploy_root}}/.deploy/nginx/default_backend.conf.dist $targetFile");
 
     // upload user vhost map
