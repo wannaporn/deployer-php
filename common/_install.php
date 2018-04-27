@@ -24,6 +24,16 @@ task('common:install:init', function () {
     // create target
     run('if [ ! -d {{deploy_root}} ]; then mkdir -p {{deploy_root}}; fi');
 
+    // upload docker
+    if (get('docker')) {
+        upload('{{docker}}/*', "{{deploy_root}}/.docker");
+        run('rm -rf {{deploy_root}}/.docker/var/*');
+        run('rm -rf {{deploy_root}}/.docker/logs/*');
+        run('rm -rf {{deploy_root}}/.docker/node_modules');
+        run('mkdir -p {{deploy_root}}/.docker/var/rabbitmq/mnesia');
+        run('chmod -R 0777 {{deploy_root}}/.docker/var/rabbitmq');
+    }
+
     // upload config
     upload('{{app_path}}/*', "{{deploy_root}}/.deploy");
 
@@ -70,6 +80,11 @@ task('common:install:init_vhost', function () {
 
     // upload user vhost map
     upload($vhostMapPath, "{{deploy_root}}/.deploy/nginx/http.d/vhost_map_user.conf");
+
+    foreach (get('vhost_files', []) as $vhost) {
+        $vhostFile = explode('/', $vhost);
+        upload($vhost, "{{deploy_root}}/.deploy/nginx/vhost.d/" . $vhostFile[count($vhostFile) - 1]);
+    }
 
     _substitutions([
         'EDIT_ME_BACKEND_PORT' => $backendPort,

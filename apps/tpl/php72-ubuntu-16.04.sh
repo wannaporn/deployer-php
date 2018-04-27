@@ -17,20 +17,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -y --allow-unauthenticated update
 apt-get -y --allow-unauthenticated upgrade
 
-# php7.2 - https://thishosting.rocks/install-php-on-ubuntu/
-apt-get install -y --allow-unauthenticated software-properties-common python-software-properties
-add-apt-repository ppa:ondrej/php -y
-add-apt-repository ppa:ondrej/nginx -y
-apt-get -y --allow-unauthenticated update
-
-# redis
-apt-get -y --allow-unauthenticated install build-essential tcl
-cd /tmp && curl -O http://download.redis.io/redis-stable.tar.gz && tar xzvf redis-stable.tar.gz
-cd redis-stable
-make && make install
-mkdir /etc/redis && mkdir /var/lib/redis
-cd ~
-
 # basic requirements
 apt-get -y --allow-unauthenticated install \
     curl \
@@ -47,6 +33,34 @@ apt-get -y --allow-unauthenticated install \
     nginx \
     pwgen \
     supervisor
+
+# docker
+sudo curl -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+apt-get -y --allow-unauthenticated install \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+apt-key fingerprint 0EBFCD88
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+apt-get -y --allow-unauthenticated update
+apt-get -y --allow-unauthenticated install docker-ce
+docker run hello-world
+
+# php7.2 - https://thishosting.rocks/install-php-on-ubuntu/
+apt-get install -y --allow-unauthenticated software-properties-common python-software-properties
+add-apt-repository ppa:ondrej/php -y
+add-apt-repository ppa:ondrej/nginx -y
+apt-get -y --allow-unauthenticated update
+
+# redis
+apt-get -y --allow-unauthenticated install build-essential tcl
+cd /tmp && curl -O http://download.redis.io/redis-stable.tar.gz && tar xzvf redis-stable.tar.gz
+cd redis-stable
+make && make install
+mkdir /etc/redis && mkdir /var/lib/redis
+cd ~
 
 # sf requirements
 apt-get -y --allow-unauthenticated install \
@@ -114,4 +128,3 @@ echo redis password: $REDIS_PASSWORD
 echo supervisor password: $SUPERVISOR_PASSWORD
 
 shutdown -r now
-#https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-postfix-as-a-send-only-smtp-server-on-ubuntu-16-04
