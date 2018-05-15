@@ -10,10 +10,10 @@ server_00:
     repository: ~
     redis_password: ~
     supervisor_password: ~
-    cloudflare:
-        email: ~
-        api_key: ~
-        domain: ~
+#    cloudflare:
+#        email: ~
+#        api_key: ~
+#        domain: ~
     environments:
         <<: *environments
         http_strict_server_name: true
@@ -23,25 +23,25 @@ server_00:
         EDIT_ME_SUPERVISOR_PASSWORD: '{{supervisor_password}}'
     copy_local_dirs:
         - templates/emails/build
-    defines:
-        fresh_install:
-            - sf_run(doctrine:database:drop --force --if-exists)
-            - sf_run(doctrine:database:create)
-            - sf_run(doctrine:database:drop --force --if-exists --connection=media)
-            - sf_run(doctrine:database:create --connection=media)
-            - sf_run(doctrine:schema:update --dump-sql --force)
-            - sf_run(doctrine:phpcr:init:dbal --force)
-            - sf_run(doctrine:phpcr:repository:init)
-            - sf_run(sylius:fixtures:load default)
-            - sf_run(doctrine:fixtures:load --append)
-            - sf_run(cache:warmup)
+#    defines:
+#        fresh_install:
+#            - sf_run(doctrine:database:drop --force --if-exists)
+#            - sf_run(doctrine:database:create)
+#            - sf_run(doctrine:database:drop --force --if-exists --connection=media)
+#            - sf_run(doctrine:database:create --connection=media)
+#            - sf_run(doctrine:schema:update --dump-sql --force)
+#            - sf_run(doctrine:phpcr:init:dbal --force)
+#            - sf_run(doctrine:phpcr:repository:init)
+#            - sf_run(sylius:fixtures:load default)
+#            - sf_run(doctrine:fixtures:load --append)
+#            - sf_run(cache:warmup)
     tasks:
         after:
             common:install:
-                - self:fresh_install
+#                - self:fresh_install
                 - deploy:writable
-            cleanup:
-                - deploy:cloudflare
+#            cleanup:
+#                - deploy:cloudflare
     parameters:
         database_host: 127.0.0.1
         database_port: 7890
