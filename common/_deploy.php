@@ -39,7 +39,7 @@ task('common:deploy', [
     'deploy:shared',
     'deploy:assets',
     'deploy:vendors',
-    'common:copy_local',
+    //'common:copy_local',
     'deploy:assetic:dump',
     'deploy:cache:clear',
     'deploy:cache:warmup',
